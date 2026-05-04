@@ -29,7 +29,7 @@ export function AuthProvider({ children }) {
             localStorage.removeItem("morada_current_user");
           }
         }
-        
+
         if (savedUser) setUser(savedUser);
       } catch (err) {
         console.error("Erro na inicialização:", err);

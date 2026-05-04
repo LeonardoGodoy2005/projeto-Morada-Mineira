@@ -10,6 +10,7 @@ import { formatDateFull, formatDateRelative } from "@/lib/dateUtils";
 import PhotoCapture from "@/components/evidence/PhotoCapture";
 import Lightbox from "@/components/ui/Lightbox";
 import Modal from "@/components/ui/Modal";
+import { deleteButtonStyle } from "@/lib/uiConstants";
 
 export default function TaskDetailPage() {
   const { id } = useParams();
@@ -74,6 +75,18 @@ export default function TaskDetailPage() {
     toast.warning("Evidência rejeitada. Tarefa devolvida.");
     setRejectModal(null);
     setRejectReason("");
+  }
+
+  async function handleDeleteEv(ev, closeLightbox = false) {
+    if (!confirm("Tem certeza que deseja apagar esta evidência?")) return;
+    try {
+      await deleteEvidence(ev.id, task.id);
+      if (closeLightbox) setLightboxImg(null);
+      toast.success("Evidência apagada");
+    } catch (err) {
+      console.error("Erro ao apagar evidência:", err);
+      toast.error("Ocorreu um erro ao apagar a evidência.");
+    }
   }
 
   return (
@@ -186,33 +199,10 @@ export default function TaskDetailPage() {
                 
                 {isGerente && (
                   <button 
-                    style={{
-                      position: 'absolute',
-                      top: '8px',
-                      left: '8px',
-                      background: 'var(--color-danger)',
-                      border: 'none',
-                      borderRadius: '50%',
-                      width: '32px',
-                      height: '32px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      zIndex: 10,
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
-                    }}
-                    onClick={async (e) => {
+                    style={deleteButtonStyle}
+                    onClick={(e) => {
                       e.stopPropagation();
-                      if (confirm("Tem certeza que deseja apagar esta evidência?")) {
-                        try {
-                          await deleteEvidence(ev.id, task.id);
-                          toast.success("Evidência apagada");
-                        } catch (err) {
-                          console.error("Erro ao apagar evidência:", err);
-                          alert("Ocorreu um erro ao apagar a evidência.");
-                        }
-                      }
+                      handleDeleteEv(ev);
                     }}
                   >
                     🗑️
@@ -274,18 +264,9 @@ export default function TaskDetailPage() {
                 <button 
                   className="btn btn-danger btn-sm" 
                   style={{ marginTop: 12, width: '100%' }}
-                  onClick={async (e) => {
+                  onClick={(e) => {
                     e.stopPropagation();
-                    if (confirm("Tem certeza que deseja apagar esta evidência?")) {
-                      try {
-                        await deleteEvidence(lightboxImg.id, task.id);
-                        setLightboxImg(null);
-                        toast.success("Evidência apagada");
-                      } catch (err) {
-                        console.error("Erro ao apagar evidência:", err);
-                        alert("Ocorreu um erro ao apagar a evidência.");
-                      }
-                    }
+                    handleDeleteEv(lightboxImg, true);
                   }}
                 >
                   🗑️ Apagar Evidência Definitivamente
